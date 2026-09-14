@@ -124,3 +124,7 @@ O horário oficial de Brasília é UTC-3 e não usa horário de verão atualment
 - mantenha o token apenas nos GitHub Actions Secrets;
 - se o token vazar, revogue-o no BotFather e gere outro;
 - o histórico contém apenas informações públicas dos concursos encontrados.
+
+## CSV legível do histórico
+
+A cada execução, o bot também gera `data/concursos.csv` com todas as oportunidades do histórico. O arquivo inclui status do prazo, dias restantes, compatibilidade, score, UF, título, salário, vagas, inscrições, etapas/provas e links. O GitHub Actions versiona esse CSV junto com `data/history.json`, então ele pode ser aberto ou baixado diretamente pelo repositório.

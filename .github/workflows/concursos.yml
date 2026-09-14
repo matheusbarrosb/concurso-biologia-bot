@@ -46,14 +46,14 @@ jobs:
           SEND_DAILY_DIGEST: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '30 11 * * *' }}
         run: python bot.py
 
-      - name: Persistir histórico
+      - name: Persistir histórico e CSV
         run: |
-          if git diff --quiet -- data/history.json; then
-            echo "Sem alteração no histórico."
+          if git diff --quiet -- data/history.json data/concursos.csv; then
+            echo "Sem alteração no histórico ou CSV."
             exit 0
           fi
           git config user.name "concurso-biologia-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/history.json
-          git commit -m "chore: atualizar histórico de concursos"
+          git add data/history.json data/concursos.csv
+          git commit -m "chore: atualizar histórico e CSV de concursos"
           git push

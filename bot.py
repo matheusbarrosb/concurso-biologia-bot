@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import date
 
+from csv_export import export_history_csv
 from config import (
     DIGEST_DAYS_AHEAD,
     DIGEST_MAX_ITEMS,
@@ -100,7 +101,9 @@ def main() -> None:
         telegram.send(digest_message(digest[:DIGEST_MAX_ITEMS]))
 
     history.save()
+    csv_path = export_history_csv(history.data["items"].values())
     log.info("Histórico salvo em data/history.json")
+    log.info("CSV atualizado em %s", csv_path)
 
 
 if __name__ == "__main__":
