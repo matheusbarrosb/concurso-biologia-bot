@@ -1,0 +1,59 @@
+name: Monitorar concursos de Biologia
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 08:30 e 18:30 no horário de Brasília (UTC-3)
+    - cron: "30 11 * * *"
+    - cron: "30 21 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: concurso-biologia-bot
+  cancel-in-progress: false
+
+jobs:
+  monitorar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar testes locais
+        run: python -m unittest discover -s tests -v
+
+      - name: Executar monitor
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # No agendamento, o resumo diário sai na execução da manhã.
+          # Execução manual também envia o resumo para facilitar testes.
+          SEND_DAILY_DIGEST: ${{ github.event_name == 'workflow_dispatch' || github.event.schedule == '30 11 * * *' }}
+        run: python bot.py
+
+      - name: Persistir histórico
+        run: |
+          if git diff --quiet -- data/history.json; then
+            echo "Sem alteração no histórico."
+            exit 0
+          fi
+          git config user.name "concurso-biologia-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json
+          git commit -m "chore: atualizar histórico de concursos"
+          git push
